@@ -1,0 +1,19 @@
+services:
+  backup:
+    build:
+      context: .
+      args:
+        PG_VERSION: "17"
+    environment:
+      DATABASE_URL: postgres://user:pass@host:5432/dbname
+      AGE_PUBLIC_KEY: age1exampleexampleexampleexampleexampleexampleexampleexampleexample
+      S3_ENDPOINT: https://s3.example.com
+      S3_BUCKET: my-backups
+      S3_PATH: zow-v5/prod
+      S3_ACCESS_KEY_ID: change-me
+      S3_SECRET_ACCESS_KEY: change-me
+      S3_REGION: us-east-1
+      BACKUP_SCHEDULE: "0 * * * *"
+      BACKUP_KEEP_DAYS: "30"
+      RUN_ON_START: "false"
+    restart: unless-stopped
