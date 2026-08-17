@@ -38,9 +38,21 @@ cannot read anything it wrote.
 
 ## Deploy to CapRover
 
-Create one CapRover app per database. Point each app at this repo, then set the
-env vars from `.env.example`. Keep `S3_PATH` unique per app (for example
-`zow-v6/labs`, `zow-v6/production`) so their backups do not mingle.
+Every push to `main` builds a multi-arch image and pushes it to GHCR as
+`ghcr.io/<owner>/<repo>:latest` (plus a short-sha tag, and on git tags the tag
+name). See `.github/workflows/build.yml`.
+
+Create one CapRover app per database. For each app:
+
+- Deployment method: "Deploy via ImageName"
+- Image: `ghcr.io/<owner>/<repo>:latest` (or pin a sha/tag)
+- Set env vars from `.env.example`
+- Keep `S3_PATH` unique per app (for example `zow-v6/labs`,
+  `zow-v6/production`) so their backups do not mingle
+
+To auto-redeploy every app on a new image push, copy each app's webhook URL
+from CapRover, comma-join them into a repo secret named `CAPROVER_WEBHOOKS`,
+and uncomment the `notify` job in the workflow.
 
 ## Deploy with docker-compose
 
