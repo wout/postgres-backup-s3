@@ -32,22 +32,20 @@ if ((daily_days <= hourly_days)); then
 fi
 
 log "thinning to one/day between ${hourly_days}d and ${daily_days}d"
-mapfile -t days < <(
-  rclone lsf --dirs-only --recursive --s3-no-check-bucket \
+mapfile -t candidates < <(
+  rclone lsf --files-only --recursive --s3-no-check-bucket \
     --min-age "${hourly_days}d" --max-age "${daily_days}d" \
-    "s3:${S3_BUCKET}/${prefix}" |
-    grep -E '^[0-9]{4}/[0-9]{2}/[0-9]{2}/$' || true
+    "s3:${S3_BUCKET}/${prefix}" | sort
 )
-for day in "${days[@]}"; do
-  mapfile -t objs < <(
-    rclone lsf --files-only --s3-no-check-bucket \
-      "s3:${S3_BUCKET}/${prefix}${day}" | sort
-  )
-  ((${#objs[@]} > 1)) || continue
-  for obj in "${objs[@]:0:${#objs[@]}-1}"; do
-    rclone deletefile --s3-no-check-bucket \
-      "s3:${S3_BUCKET}/${prefix}${day}${obj}"
-  done
+declare -A newest_per_day
+for path in "${candidates[@]}"; do
+  newest_per_day["${path%/*}/"]="$path"
+done
+for path in "${candidates[@]}"; do
+  day="${path%/*}/"
+  [[ "$path" == "${newest_per_day[$day]}" ]] && continue
+  rclone deletefile --s3-no-check-bucket \
+    "s3:${S3_BUCKET}/${prefix}${path}"
 done
 
 log "pruning objects older than ${daily_days}d"
