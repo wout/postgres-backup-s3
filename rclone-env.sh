@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Derive rclone S3 remote config from base env vars. Source, don't exec.
+export RCLONE_CONFIG=/dev/null
 export RCLONE_CONFIG_S3_TYPE=s3
 export RCLONE_CONFIG_S3_PROVIDER="${S3_PROVIDER:-Other}"
 export RCLONE_CONFIG_S3_ENDPOINT="$S3_ENDPOINT"
