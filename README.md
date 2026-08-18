@@ -11,8 +11,14 @@ One container per database. Same image, different env vars.
 `supercronic` runs `backup.sh` on the schedule you set. Each run streams
 `pg_dump | age | rclone rcat` straight into S3. Nothing ever hits local disk.
 
-If `BACKUP_KEEP_DAYS` is set, old objects under your prefix are pruned after
-each successful upload.
+After each successful upload, retention runs in two passes:
+
+- Every dump from the last `BACKUP_KEEP_HOURLY_DAYS` days (default 3) is kept.
+- Between then and `BACKUP_KEEP_DAILY_DAYS` (default 30), only the newest dump
+  per UTC day survives, older siblings within each day are deleted.
+- Anything older than `BACKUP_KEEP_DAILY_DAYS` is purged entirely.
+
+`BACKUP_KEEP_DAILY_DAYS` must be strictly greater than `BACKUP_KEEP_HOURLY_DAYS`.
 
 Encryption uses age with an asymmetric key. Only the public key lives on the
 backup box. The private key stays offline. A compromised backup container
@@ -81,9 +87,10 @@ recreated. Point it at a scratch database the first time.
 ## Files
 
 - `Dockerfile`: base image, pins PG major and supercronic version
-- `entrypoint.sh`: validates env, configures rclone, runs cron
-- `backup.sh`: the dump + encrypt + upload pipeline
+- `entrypoint.sh`: validates env, sources rclone config, runs cron
+- `backup.sh`: the dump + encrypt + upload pipeline, plus tiered pruning
 - `restore.sh`: manual restore helper
+- `rclone-env.sh`: derives rclone remote config from S3\_\* env vars
 - `captain-definition`: CapRover build manifest
 - `docker-compose.yml`: local testing
 - `.env.example`: all supported env vars
