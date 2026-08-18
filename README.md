@@ -45,10 +45,10 @@ name). See `.github/workflows/build.yml`.
 Create one CapRover app per database. For each app:
 
 - Deployment method: "Deploy via ImageName"
-- Image: `ghcr.io/<owner>/<repo>:latest` (or pin a sha/tag)
+- Image: `ghcr.io/wout/postgres-backup-s3:latest` (or pin a sha/tag)
 - Set env vars from `.env.example`
-- Keep `S3_PATH` unique per app (for example `zow-v6/labs`,
-  `zow-v6/production`) so their backups do not mingle
+- Keep `S3_PATH` unique per app (for example `project/staging`,
+  `project/production`) so their backups do not mingle
 
 To auto-redeploy every app on a new image push, copy each app's webhook URL
 from CapRover, comma-join them into a repo secret named `CAPROVER_WEBHOOKS`,
