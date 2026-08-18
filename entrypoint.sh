@@ -28,4 +28,4 @@ crontab="/tmp/crontab"
 printf '%s /usr/local/bin/backup.sh\n' "$BACKUP_SCHEDULE" >"$crontab"
 
 echo "starting supercronic, schedule: ${BACKUP_SCHEDULE}"
-exec supercronic "$crontab"
+exec /usr/local/bin/supercronic "$crontab"
