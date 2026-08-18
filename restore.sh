@@ -8,6 +8,8 @@ set -euo pipefail
 : "${AGE_IDENTITY_FILE:?required (path to age private key inside container)}"
 : "${S3_BUCKET:?required}"
 
+source /usr/local/bin/rclone-env.sh
+
 object="${1:?usage: restore.sh <s3-object-key>}"
 remote="s3:${S3_BUCKET}/${object}"
 

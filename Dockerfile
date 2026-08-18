@@ -12,7 +12,7 @@ RUN apk add --no-cache age rclone tzdata bash ca-certificates curl \
   && chmod +x /usr/local/bin/supercronic \
   && apk del curl
 
-COPY entrypoint.sh backup.sh restore.sh /usr/local/bin/
+COPY entrypoint.sh backup.sh restore.sh rclone-env.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/entrypoint.sh \
   /usr/local/bin/backup.sh \
   /usr/local/bin/restore.sh

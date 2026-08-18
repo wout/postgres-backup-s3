@@ -6,6 +6,8 @@ set -euo pipefail
 : "${S3_BUCKET:?required}"
 : "${S3_PATH:=}"
 
+source /usr/local/bin/rclone-env.sh
+
 log() { printf '[%s] %s\n' "$(date -u +%FT%TZ)" "$*"; }
 
 now=$(date -u +%Y/%m/%d/%H%M%SZ)
@@ -24,7 +26,7 @@ log "backup done"
 hourly_days="${BACKUP_KEEP_HOURLY_DAYS:-3}"
 daily_days="${BACKUP_KEEP_DAILY_DAYS:-30}"
 
-if (( daily_days <= hourly_days )); then
+if ((daily_days <= hourly_days)); then
   log "BACKUP_KEEP_DAILY_DAYS must exceed BACKUP_KEEP_HOURLY_DAYS" >&2
   exit 1
 fi
@@ -41,7 +43,7 @@ for day in "${days[@]}"; do
     rclone lsf --files-only --s3-no-check-bucket \
       "s3:${S3_BUCKET}/${prefix}${day}" | sort
   )
-  (( ${#objs[@]} > 1 )) || continue
+  ((${#objs[@]} > 1)) || continue
   for obj in "${objs[@]:0:${#objs[@]}-1}"; do
     rclone deletefile --s3-no-check-bucket \
       "s3:${S3_BUCKET}/${prefix}${day}${obj}"
